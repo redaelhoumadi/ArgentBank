@@ -3,31 +3,35 @@
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { X } from "lucide-react"
-
 import { cn } from "@/lib/utils"
 
+
+// Création des composants de base du dialogue en les assignant aux composants Radix
 const Dialog = DialogPrimitive.Root
-
 const DialogTrigger = DialogPrimitive.Trigger
-
 const DialogPortal = DialogPrimitive.Portal
-
 const DialogClose = DialogPrimitive.Close
 
+// Composant pour l'overlay du dialogue
 const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
+      // Classes pour le style de l'overlay et les animations
       "fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      className
+      className // Ajout de classes supplémentaires passées en props
     )}
-    {...props} />
+    {...props}  /> // Passage des autres props
 ))
-DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
+
+// Composant pour le contenu du dialogue
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName 
 
 const DialogContent = React.forwardRef(({ className, children, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay />
+  // Utilisation d'un portail pour rendre le contenu en dehors de la hiérarchie DOM courante
+  <DialogPortal> 
+  
+    <DialogOverlay /> {/* Inclusion de l'overlay */}
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
@@ -46,6 +50,7 @@ const DialogContent = React.forwardRef(({ className, children, ...props }, ref) 
 ))
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
+// Composant pour l'en-tête du dialogue
 const DialogHeader = ({
   className,
   ...props
@@ -56,6 +61,7 @@ const DialogHeader = ({
 )
 DialogHeader.displayName = "DialogHeader"
 
+// Composant pour le pied de page du dialogue
 const DialogFooter = ({
   className,
   ...props
@@ -66,6 +72,7 @@ const DialogFooter = ({
 )
 DialogFooter.displayName = "DialogFooter"
 
+// Composant pour le titre du dialogue
 const DialogTitle = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
@@ -74,6 +81,7 @@ const DialogTitle = React.forwardRef(({ className, ...props }, ref) => (
 ))
 DialogTitle.displayName = DialogPrimitive.Title.displayName
 
+// Composant pour la description du dialogue
 const DialogDescription = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
