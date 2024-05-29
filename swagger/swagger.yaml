@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   title: Bank Argent API documentation 2/2
-  description: Contains all available API endpoints in this codebase for account
+  description: Contains all available API endpoints in this codebase for transactions
   version: '1.0.0'
   termsOfService: 'http://swagger.io/terms/'
 host: localhost:3001
@@ -9,217 +9,182 @@ basePath: /api/v1
 schemes:
   - http
 paths:
-  /user/profile/{accountId}:
+  /transactions:
     get:
-      security:
-        - Bearer: []  # Utilisation de la sécurité basée sur les tokens Bearer
       tags:
-        - Account details  # Tag pour catégoriser cet endpoint
-      summary: Find account's last transactions
-      description: API for fetching last transactions
-      parameters:
-        - in: header
-          type: string
-          name: Authorization  # JWT Token nécessaire pour l'autorisation
-          description: Attach Bearer JWT Token
-          required: true
-        - name: accountId
-          in: path  # Paramètre dans le chemin de l'URL
-          description: Id of account
-          required: true
-          type: string
-        - name: period
-          in: body  # Paramètre dans le corps de la requête
-          required: true
-          description: Current Month
-          schema:
-            $ref: '#/definitions/TransactionsPeriod'  # Référence à la définition du schéma pour la période
+        - Transactions
+      summary: Get transactions for the current month grouped by account
+      description: Retrieve all transactions for the current month, grouped by account
       produces:
-        - application/json  # Le type de réponse produit
+        - application/json
       responses:
         '200':
-          description: Successfully
+          description: Successfully retrieved transactions
           schema:
-            $ref: '#/definitions/LastTransactions'  # Référence au schéma de la réponse en cas de succès
-        '400':
-          description: Invalid Fields
-        '401':
-          description: Invalid Token
-        '404':
-          description: Not Found
+            type: object
+            properties:
+              accounts:
+                type: array
+                items:
+                  $ref: '#/definitions/AccountTransactions'
         '500':
           description: Internal Server Error
 
-  /user/{accountId}/{transactionId}:
+  /transactions/{transactionId}:
     get:
-      security:
-        - Bearer: []  # Utilisation de la sécurité basée sur les tokens Bearer
       tags:
-        - Transaction details  # Tag pour catégoriser cet endpoint
-      summary: Find transaction by Id
-      description: API for fetching one transaction details
+        - Transactions
+      summary: Get transaction details
+      description: Retrieve details of a specific transaction
       parameters:
-        - in: header
-          type: string
-          name: Authorization  # JWT Token nécessaire pour l'autorisation
-          description: Attach Bearer JWT Token
-          required: true
-        - name: accountId
-          in: path  # Paramètre dans le chemin de l'URL
-          description: Id of account
-          required: true
-          type: string
-        - name: transactionId
-          in: path  # Paramètre dans le chemin de l'URL
-          description: Id of transaction
+        - in: path
+          name: transactionId
+          description: ID of the transaction to retrieve
           required: true
           type: string
       produces:
-        - application/json  # Le type de réponse produit
+        - application/json
       responses:
         '200':
-          description: Successfully
+          description: Successfully retrieved transaction details
           schema:
-            $ref: '#/definitions/Transaction'  # Référence au schéma de la réponse en cas de succès
-        '400':
-          description: Invalid Fields
-        '401':
-          description: Invalid Token
+            $ref: '#/definitions/TransactionDetails'
         '404':
-          description: Not Found
+          description: Transaction not found
         '500':
           description: Internal Server Error
-    put:
-      security:
-        - Bearer: []  # Utilisation de la sécurité basée sur les tokens Bearer
+
+  /transactions/{transactionId}/category:
+    post:
       tags:
-        - Change transaction  # Tag pour catégoriser cet endpoint
-      summary: Modify transaction details
-      description: API for change transaction details
+        - Transactions
+      summary: Add category and note to a transaction
+      description: Add category and note to a specific transaction
       parameters:
-        - in: header
-          type: string
-          name: Authorization  # JWT Token nécessaire pour l'autorisation
-          description: Attach Bearer JWT Token
-          required: true
-        - name: accountId
-          in: path  # Paramètre dans le chemin de l'URL
-          description: Id of account
-          required: true
-          type: string
-        - name: transactionId
-          in: path  # Paramètre dans le chemin de l'URL
-          description: Id of transaction
+        - in: path
+          name: transactionId
+          description: ID of the transaction to add category and note
           required: true
           type: string
         - in: body
-          name: body  # Paramètre dans le corps de la requête
-          description: Update transaction attributes
+          name: body
+          description: Category and note data to add
           required: true
           schema:
-            $ref: '#/definitions/TransactionChange'  # Référence à la définition du schéma pour les modifications de transaction
+            $ref: '#/definitions/CategoryNote'
       produces:
-        - application/json  # Le type de réponse produit
+        - application/json
       responses:
         '200':
-          description: Transaction's modified
+          description: Category and note added successfully
           schema:
-            $ref: '#/definitions/Transaction'  # Référence au schéma de la réponse en cas de succès
+            $ref: '#/definitions/TransactionDetails'
         '400':
-          description: Invalid Fields
-        '401':
-          description: Invalid Token
+          description: Invalid request
         '404':
-          description: Not Found
+          description: Transaction not found
         '500':
           description: Internal Server Error
 
-securityDefinitions:
-  Bearer:
-    type: apiKey  # Définition du type de sécurité comme apiKey
-    name: Authorization
-    in: header
+    put:
+      tags:
+        - Transactions
+      summary: Update category and note of a transaction
+      description: Update category and note of a specific transaction
+      parameters:
+        - in: path
+          name: transactionId
+          description: ID of the transaction to update category and note
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Updated category and note data
+          required: true
+          schema:
+            $ref: '#/definitions/CategoryNote'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Category and note updated successfully
+          schema:
+            $ref: '#/definitions/TransactionDetails'
+        '400':
+          description: Invalid request
+        '404':
+          description: Transaction not found
+        '500':
+          description: Internal Server Error
+
+    delete:
+      tags:
+        - Transactions
+      summary: Delete category and note of a transaction
+      description: Delete category and note of a specific transaction
+      parameters:
+        - in: path
+          name: transactionId
+          description: ID of the transaction to delete category and note
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '204':
+          description: Category and note deleted successfully
+        '404':
+          description: Transaction not found
+        '500':
+          description: Internal Server Error
+
 definitions:
-  TransactionsPeriod:
-    type: object  # Définition d'un objet pour la période des transactions
+  AccountTransactions:
+    type: object
     properties:
-      from:
+      account_id:
         type: string
-        format: date
-        description: start date (30 days before)
-        example: '2022-01-01'
-      to:
-        type: string
-        format: date
-        description: end date (today)
-        example: '2022-02-01'
-  LastTransactions:
-    type: object  # Définition d'un objet pour les dernières transactions
+      transactions:
+        type: array
+        items:
+          $ref: '#/definitions/TransactionSummary'
+
+  TransactionSummary:
+    type: object
     properties:
-      TransactionId:
+      transaction_id:
         type: string
-        description: account's id
-        example: "2357644"
-      Date:
+      date:
         type: string
         format: date
-        example: "2022-01-20"
-        description: transaction's date
-      Description:
-        type: string
-        description: transaction's description
-        example: "Golden Sun Bakery"
-      Amount:
+      amount:
         type: number
-        description: transaction's amount
-        example: 2567
-      Balance:
+
+  TransactionDetails:
+    type: object
+    properties:
+      transaction_id:
+        type: string
+      date:
+        type: string
+        format: date
+      description:
+        type: string
+      amount:
         type: number
-        description: transaction's balance
-        example: 145
-  Transaction:
-    type: object  # Définition d'un objet pour une transaction
+      balance:
+        type: number
+      transaction_type:
+        type: string
+      category:
+        type: string
+      note:
+        type: string
+
+  CategoryNote:
+    type: object
     properties:
-      TransactionId:
+      category:
         type: string
-        description: transaction's id
-        example: "2357644"
-      Date:
+      note:
         type: string
-        description: transaction's date
-        example: "20-12-2021"
-      Description:
-        type: string
-        description: transaction's description
-        example: "Golden Sun Bakery"
-      Amount:
-        type: integer
-        description: transaction's amount
-        example: 5.65
-      Balance:
-        type: integer
-        description: transaction's balance
-        example: 2037.37
-      TransactionType:
-        type: string  # Notez la correction de l'espace en "Transaction type"
-        description: transaction's type
-        example: "Electronic"
-      Category:
-        type: string
-        description: transaction's category
-        example: "Food"
-      Note:
-        type: string
-        description: transaction's note
-        example: "Lunch for two"
-  TransactionChange:
-    type: object  # Définition d'un objet pour les modifications de transaction
-    properties:
-      Category:
-        type: string
-        description: transaction's category
-        example: "Home"
-      Note:
-        type: string
-        description: transaction's note
-        example: "Ikea"
